@@ -88,6 +88,9 @@
     text-transform: uppercase; letter-spacing: .01em; font-weight: 700;
   }
   header.top h1 span { color: var(--accent); }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .emblem { width: 86px; height: 86px; flex: 0 0 auto; }
+  @media (max-width: 520px) { .emblem { width: 64px; height: 64px; } .brand { gap: 12px; } }
   .tagline { color: var(--muted); font-size: 15px; max-width: 34ch; margin: 0; }
 
   .turn {
@@ -240,9 +243,64 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <div>
-      <p class="eyebrow">Équipe de garde</p>
-      <h1>Tour de <span>Repas</span></h1>
+    <div class="brand">
+      <svg class="emblem" viewBox="0 0 512 512" role="img" aria-label="Emblème Équipe de garde 1">
+      <defs>
+      <path id="arcTop" d="M 40,256 A 216,216 0 0 1 472,256"/>
+      <path id="arcBottom" d="M 44,256 A 212,212 0 0 0 468,256"/>
+      </defs>
+      <!-- médaillon -->
+      <circle cx="256" cy="256" r="250" fill="#F3EBE2"/>
+      <circle cx="256" cy="256" r="244" fill="none" stroke="#B5312A" stroke-width="11"/>
+      <circle cx="256" cy="256" r="190" fill="none" stroke="#B5312A" stroke-width="3" opacity=".5"/>
+      <!-- texte circulaire -->
+      <text text-anchor="middle" font-family="'Barlow Condensed','Oswald','Arial Narrow',sans-serif"
+      font-weight="700" font-size="35" letter-spacing="5" fill="#B5312A">
+      <textPath href="#arcTop" startOffset="50%">ÉQUIPE DE GARDE 1</textPath>
+      </text>
+      <text text-anchor="middle" font-family="'Barlow Condensed','Oswald','Arial Narrow',sans-serif"
+      font-weight="700" font-size="30" letter-spacing="4" fill="#8E6A22">
+      <textPath href="#arcBottom" startOffset="50%">CASERNE DE VIENNE</textPath>
+      </text>
+      <!-- couverts croisés, pointes en haut -->
+      <g transform="translate(0,-26)">
+      <g transform="rotate(-30 256 256)">
+      <rect x="250" y="206" width="13" height="150" rx="6.5" fill="#A8792C"/>
+      <rect x="242" y="188" width="29" height="24" rx="5" fill="#A8792C"/>
+      <rect x="242" y="150" width="7" height="42" rx="3.5" fill="#A8792C"/>
+      <rect x="253" y="150" width="7" height="42" rx="3.5" fill="#A8792C"/>
+      <rect x="264" y="150" width="7" height="42" rx="3.5" fill="#A8792C"/>
+      </g>
+      <g transform="rotate(30 256 256)">
+      <rect x="250" y="206" width="13" height="150" rx="6.5" fill="#C08F38"/>
+      <ellipse cx="256" cy="178" rx="27" ry="35" fill="#C08F38"/>
+      <ellipse cx="256" cy="176" rx="17" ry="24" fill="#EBD6A4" opacity=".55"/>
+      </g>
+      </g>
+      <!-- marmite + foyer -->
+      <g transform="translate(0,-20)">
+      <g>
+      <rect x="158" y="300" width="23" height="36" rx="11" fill="#2F2A28"/>
+      <rect x="331" y="300" width="23" height="36" rx="11" fill="#2F2A28"/>
+      <path d="M 176,290 L 336,290 L 324,372 Q 322,390 302,390 L 210,390 Q 190,390 188,372 Z" fill="#2F2A28"/>
+      <path d="M 198,306 Q 194,350 206,380" fill="none" stroke="#5C5450" stroke-width="7" stroke-linecap="round" opacity=".75"/>
+      <ellipse cx="256" cy="288" rx="90" ry="16" fill="#3B3431"/>
+      <ellipse cx="256" cy="284" rx="90" ry="13" fill="#4C443F"/>
+      <rect x="244" y="260" width="24" height="13" rx="6" fill="#8E6A22"/>
+      <ellipse cx="256" cy="260" rx="14" ry="7" fill="#B08430"/>
+      </g>
+      <g>
+      <path d="M 208,432 C 190,410 204,394 218,386 C 222,404 238,408 230,428 Z" fill="#E0A33A"/>
+      <path d="M 304,432 C 322,410 308,394 294,386 C 290,404 274,408 282,428 Z" fill="#E0A33A"/>
+      <path d="M 256,446 C 226,420 238,400 256,384 C 274,400 286,420 256,446 Z" fill="#C8442E"/>
+      <path d="M 256,436 C 242,420 248,408 256,398 C 264,408 270,420 256,436 Z" fill="#EBC05C"/>
+      </g>
+      </g>
+      </svg>
+      <div>
+        <p class="eyebrow">Équipe de garde 1</p>
+        <h1>Tour de <span>Repas</span></h1>
+      </div>
     </div>
     <p class="tagline">Qui a fait la popote, combien de fois, et à qui le tour.</p>
   </header>
