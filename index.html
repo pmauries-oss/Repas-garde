@@ -507,9 +507,10 @@ var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
   }
 
   /* Première mise en service : crée l'équipe si la table est vide.
-     Les identifiants étant fixes, un double appel ne crée pas de doublon. */
+     La contrainte d'unicité sur le nom (voir schema.sql) empêche tout doublon,
+     même si plusieurs équipiers ouvrent la page en même temps. */
   function seedEquipe() {
-    return api("equipiers?on_conflict=id", {
+    return api("equipiers?on_conflict=nom", {
       method: "POST",
       body: EQUIPE.map(function (e) { return { id: e.id, nom: e.nom, actif: true }; }),
       prefer: "resolution=ignore-duplicates,return=minimal"
