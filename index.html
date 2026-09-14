@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tour de Repas — équipe de garde</title>
+<meta name="description" content="Compteur des repas de garde : qui a cuisiné, à quelle date, midi ou soir, et à qui le tour.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --ground: #F7F5F3;
+    --surface: #FFFFFF;
+    --surface-2: #F1ECE8;
+    --ink: #1C1A19;
+    --muted: #6E6663;
+    --line: #E3DCD7;
+    --accent: #B5312A;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F6E4E1;
+    --gold: #8E6A22;
+    --gold-soft: #F6EBD4;
+    --shadow: 0 1px 2px rgba(28,26,25,.06), 0 8px 24px rgba(28,26,25,.05);
+    --radius: 10px;
+    --display: "Barlow Condensed", "Oswald", Impact, sans-serif;
+    --body: "Barlow", "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #171412;
+      --surface: #201C19;
+      --surface-2: #262119;
+      --ink: #F2EDE9;
+      --muted: #A49B95;
+      --line: #352E29;
+      --accent: #E4564C;
+      --accent-ink: #1A1211;
+      --accent-soft: #3A211E;
+      --gold: #DCA94B;
+      --gold-soft: #362A15;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #171412;
+    --surface: #201C19;
+    --surface-2: #262119;
+    --ink: #F2EDE9;
+    --muted: #A49B95;
+    --line: #352E29;
+    --accent: #E4564C;
+    --accent-ink: #1A1211;
+    --accent-soft: #3A211E;
+    --gold: #DCA94B;
+    --gold-soft: #362A15;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 940px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+  .eyebrow {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .14em;
+    font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 2px;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+
+  header.top {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; border-bottom: 3px solid var(--accent); padding-bottom: 14px;
+  }
+  header.top h1 {
+    font-size: clamp(34px, 7vw, 52px); line-height: .96;
+    text-transform: uppercase; letter-spacing: .01em; font-weight: 700;
+  }
+  header.top h1 span { color: var(--accent); }
+  .tagline { color: var(--muted); font-size: 15px; max-width: 34ch; margin: 0; }
+
+  .turn {
+    margin-top: 22px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    background: var(--gold-soft);
+    border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+    border-left: 5px solid var(--gold);
+    border-radius: var(--radius); padding: 16px 18px;
+  }
+  .turn .who {
+    font-family: var(--display); font-size: clamp(26px, 5vw, 34px);
+    font-weight: 700; text-transform: uppercase; line-height: 1;
+  }
+  .turn .why { color: var(--muted); font-size: 14px; }
+
+  .stats { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 26px; }
+  .stat .v { font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1; }
+  .stat .k {
+    font-size: 13px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .08em; font-family: var(--display);
+  }
+
+  section { margin-top: 38px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sec-head h2 { font-size: 22px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+
+  .board { border-top: 1px solid var(--line); }
+  .row {
+    display: grid; grid-template-columns: 34px 1fr auto; align-items: center;
+    gap: 14px; padding: 12px 4px; border-bottom: 1px solid var(--line);
+  }
+  .row .rank { font-family: var(--display); font-weight: 600; color: var(--muted); font-size: 17px; }
+  .row .name { font-weight: 600; font-size: 17px; }
+  .row .last { color: var(--muted); font-size: 13.5px; }
+  .row .count { font-family: var(--display); font-size: 26px; font-weight: 700; text-align: right; }
+  .row.is-turn .count { color: var(--gold); }
+  .row.is-turn .name::after {
+    content: "à son tour";
+    font-family: var(--display); font-size: 11px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--gold);
+    border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+    border-radius: 999px; padding: 2px 8px; margin-left: 9px; vertical-align: 2px; white-space: nowrap;
+  }
+  .row .unit { font-size: 12px; color: var(--muted); font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; }
+  .countwrap { display: flex; align-items: baseline; gap: 6px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
+  }
+  form.add { display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 14px; align-items: end; }
+  @media (max-width: 680px) { form.add { grid-template-columns: 1fr; } }
+  label.field, .field { display: flex; flex-direction: column; gap: 6px; }
+  .field > span, label.field > span {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .1em;
+    font-size: 12px; font-weight: 600; color: var(--muted);
+  }
+  select, input[type="text"], input[type="date"] {
+    font-family: var(--body); font-size: 16px; color: var(--ink);
+    background: var(--ground); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 11px; width: 100%; min-width: 0;
+  }
+  .seg { display: flex; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .08em;
+    font-size: 14px; font-weight: 600; padding: 10px 16px;
+    border: 1px solid var(--line); background: var(--ground); color: var(--muted);
+    cursor: pointer; user-select: none;
+  }
+  .seg label:first-of-type { border-radius: 8px 0 0 8px; }
+  .seg label:last-of-type { border-radius: 0 8px 8px 0; border-left: none; }
+  .seg input:checked + label {
+    background: var(--accent-soft); color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  button {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .08em;
+    font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); padding: 11px 16px;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.ghost { background: transparent; border-color: transparent; color: var(--muted); padding: 6px 8px; font-size: 13px; }
+  button.ghost:hover { color: var(--accent); }
+  button.danger { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-soft); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .hist { border-top: 1px solid var(--line); }
+  .hrow {
+    display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px;
+    align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--line);
+  }
+  .hrow .hname { font-weight: 600; }
+  .hrow .hdate { color: var(--muted); font-size: 14px; }
+  .badge {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .1em;
+    font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+  }
+  .badge.soir { background: var(--surface-2); }
+  .empty { color: var(--muted); padding: 18px 4px; font-size: 15px; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .chip {
+    font-family: var(--display); font-size: 13px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .08em; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .chip[aria-pressed="true"] {
+    background: var(--accent-soft); color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  details.manage { margin-top: 38px; border-top: 1px solid var(--line); padding-top: 14px; }
+  details.manage summary {
+    font-family: var(--display); text-transform: uppercase; letter-spacing: .1em;
+    font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .eqlist { display: flex; flex-direction: column; gap: 2px; margin-top: 14px; }
+  .eqline { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  form.addeq { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  form.addeq input { max-width: 260px; }
+
+  .notice {
+    margin-top: 18px; padding: 12px 14px; border-radius: var(--radius);
+    background: var(--accent-soft); color: var(--ink); font-size: 14.5px;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .setup { margin-top: 22px; }
+  .setup code, pre code { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 13.5px; }
+  .setup ol { margin: 10px 0 0; padding-left: 22px; }
+  .setup li { margin-bottom: 8px; }
+  pre {
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px; overflow-x: auto; margin: 10px 0 0;
+  }
+  .demo-tag {
+    font-family: var(--display); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: 600; color: var(--muted); border: 1px dashed var(--line); border-radius: 999px; padding: 2px 8px;
+  }
+  .is-demo { opacity: .55; }
+  footer.foot { margin-top: 48px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .row:hover, .hrow:hover { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+  @media (prefers-reduced-motion: no-preference) { .row, .hrow { transition: background .15s ease; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow">Équipe de garde</p>
+      <h1>Tour de <span>Repas</span></h1>
+    </div>
+    <p class="tagline">Qui a fait la popote, combien de fois, et à qui le tour.</p>
+  </header>
+
+  <div id="notice" hidden class="notice"></div>
+
+  <div class="card setup" id="setup" hidden>
+    <p class="eyebrow">Configuration à faire une seule fois</p>
+    <h2 style="font-size:20px;text-transform:uppercase;letter-spacing:.04em">Brancher la base partagée</h2>
+    <ol>
+      <li>Créer un projet gratuit sur <code>supabase.com</code>.</li>
+      <li>Dans <em>SQL Editor</em>, coller et exécuter le contenu du fichier <code>schema.sql</code>.</li>
+      <li>Dans <em>Project Settings → API</em>, copier l'<em>URL</em> et la clé <em>anon public</em>.</li>
+      <li>Les coller en haut du fichier <code>index.html</code>, puis pousser sur GitHub :</li>
+    </ol>
+<pre><code>var SUPABASE_URL  = "https://xxxxxxxx.supabase.co";
+var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:0">En attendant, la page fonctionne en local : les saisies restent dans ce navigateur.</p>
+  </div>
+
+  <div class="turn" id="turn" hidden>
+    <div>
+      <p class="eyebrow">Prochain de corvée</p>
+      <div class="who" id="turn-who">—</div>
+    </div>
+    <div class="why" id="turn-why"></div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <section>
+    <div class="sec-head">
+      <h2>Compteur</h2>
+      <div class="chips" id="period-chips"></div>
+    </div>
+    <div class="board" id="board"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Ajouter un repas</h2></div>
+    <div class="card">
+      <form class="add" id="form-add">
+        <label class="field">
+          <span>Qui a cuisiné</span>
+          <select id="f-equipier" required></select>
+        </label>
+        <label class="field">
+          <span>Date</span>
+          <input type="date" id="f-date" required>
+        </label>
+        <div class="field">
+          <span>Repas</span>
+          <div class="seg">
+            <input type="radio" name="service" id="f-midi" value="midi" checked>
+            <label for="f-midi">Midi</label>
+            <input type="radio" name="service" id="f-soir" value="soir">
+            <label for="f-soir">Soir</label>
+          </div>
+        </div>
+        <div style="grid-column:1/-1;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <button class="primary" type="submit" id="f-submit">Enregistrer le repas</button>
+          <span id="f-msg" style="color:var(--muted);font-size:14px"></span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Historique</h2>
+      <div class="chips">
+        <button class="chip" id="btn-all" type="button" hidden>Tout afficher</button>
+        <button class="chip" id="btn-csv" type="button">Export CSV</button>
+        <button class="chip" id="btn-refresh" type="button">Actualiser</button>
+      </div>
+    </div>
+    <div class="hist" id="hist"></div>
+  </section>
+
+  <details class="manage">
+    <summary>Gérer les équipiers</summary>
+    <form class="addeq" id="form-eq">
+      <input type="text" id="f-nom" placeholder="Nom de l'équipier" maxlength="40" aria-label="Nom de l'équipier">
+      <button type="submit">Ajouter</button>
+    </form>
+    <div class="eqlist" id="eqlist"></div>
+    <p style="color:var(--muted);font-size:13.5px">Retirer un équipier le sort du compteur ; ses repas déjà enregistrés restent dans l'historique.</p>
+  </details>
+
+  <footer class="foot" id="foot">Compteur partagé de l'équipe de garde.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ==========================================================
+     CONFIGURATION — coller ici l'URL et la clé anon de Supabase
+     ========================================================== */
+  var SUPABASE_URL  = "https://lpuifsnlzlkeyrxidkyj.supabase.co";
+  var SUPABASE_ANON = "sb_publishable_zGhJYqpSBhaKhVU0d3xyqg_rfBOBEEn";
+  /* ========================================================== */
+
+  var online = /^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL) && SUPABASE_ANON.length > 20;
+  var REST = SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/";
+
+  var DEMO = [
+    { nom: "Exemple · Marchand", n: 4 },
+    { nom: "Exemple · Bertrand", n: 3 },
+    { nom: "Exemple · Fayolle", n: 2 }
+  ];
+
+  var equipiers = [];   // {id, nom, actif}
+  var repas = [];       // {id, equipierId, nom, date, service, ts}
+  var period = "all";
+  var showAll = false;
+  var pendingDelete = null;
+  var LS = "tour-de-repas-local";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var fmtLong = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+  var fmtShort = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+
+  function parseDate(s) {
+    var p = String(s || "").split("-");
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) || 1);
+  }
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function notice(msg) {
+    var el = $("notice");
+    if (!msg) { el.hidden = true; return; }
+    el.hidden = false; el.textContent = msg;
+  }
+
+  /* ---------------- couche données ---------------- */
+
+  function api(path, opts) {
+    opts = opts || {};
+    var h = { apikey: SUPABASE_ANON, "Content-Type": "application/json" };
+    if (opts.prefer) h.Prefer = opts.prefer;
+    return fetch(REST + path, { method: opts.method || "GET", headers: h, body: opts.body ? JSON.stringify(opts.body) : undefined })
+      .then(function (r) {
+        if (!r.ok) return r.text().then(function (t) { throw new Error(r.status + " " + t); });
+        return r.status === 204 ? null : r.json();
+      });
+  }
+
+  function loadLocal() {
+    try {
+      var raw = localStorage.getItem(LS);
+      if (raw) { var o = JSON.parse(raw); equipiers = o.equipiers || []; repas = o.repas || []; }
+    } catch (e) { /* stockage indisponible */ }
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS, JSON.stringify({ equipiers: equipiers, repas: repas })); } catch (e) { /* ignoré */ }
+  }
+
+  function refresh() {
+    if (!online) { render(); return Promise.resolve(); }
+    return Promise.all([
+      api("equipiers?select=id,nom,actif&order=nom.asc"),
+      api("repas?select=id,equipier_id,nom,date,service,created_at&order=date.desc&limit=2000")
+    ]).then(function (res) {
+      equipiers = (res[0] || []).map(function (e) { return { id: e.id, nom: e.nom, actif: e.actif !== false }; });
+      repas = (res[1] || []).map(function (r) {
+        return {
+          id: r.id, equipierId: r.equipier_id, nom: r.nom, date: (r.date || "").slice(0, 10),
+          service: r.service === "soir" ? "soir" : "midi", ts: Date.parse(r.created_at || "") || 0
+        };
+      }).filter(function (r) { return /^\d{4}-\d{2}-\d{2}$/.test(r.date); });
+      notice("");
+      render();
+    }).catch(function () {
+      notice("Impossible de joindre la base partagée. Vérifiez la connexion, puis appuyez sur Actualiser.");
+      render();
+    });
+  }
+
+  function addEquipier(nom) {
+    if (online) {
+      api("equipiers", { method: "POST", body: { nom: nom, actif: true }, prefer: "return=minimal" })
+        .then(refresh).catch(function () { notice("L'ajout de l'équipier a échoué. Réessayez."); });
+    } else {
+      equipiers.push({ id: "l" + Date.now() + Math.random().toString(36).slice(2, 7), nom: nom, actif: true });
+      saveLocal(); render();
+    }
+  }
+  function removeEquipier(id) {
+    if (online) {
+      api("equipiers?id=eq." + encodeURIComponent(id), { method: "DELETE", prefer: "return=minimal" })
+        .then(refresh).catch(function () { notice("Le retrait de l'équipier a échoué. Réessayez."); });
+    } else {
+      equipiers = equipiers.filter(function (e) { return e.id !== id; }); saveLocal(); render();
+    }
+  }
+  function addRepas(rec) {
+    if (online) {
+      api("repas", { method: "POST", body: { equipier_id: rec.equipierId, nom: rec.nom, date: rec.date, service: rec.service }, prefer: "return=minimal" })
+        .then(refresh).catch(function () { notice("L'enregistrement du repas a échoué. Réessayez."); });
+    } else {
+      rec.id = "l" + Date.now() + Math.random().toString(36).slice(2, 7);
+      repas.push(rec); saveLocal(); render();
+    }
+  }
+  function removeRepas(id) {
+    if (online) {
+      api("repas?id=eq." + encodeURIComponent(id), { method: "DELETE", prefer: "return=minimal" })
+        .then(refresh).catch(function () { notice("La suppression a échoué. Réessayez."); });
+    } else {
+      repas = repas.filter(function (r) { return r.id !== id; }); saveLocal(); render();
+    }
+  }
+
+  /* ---------------- calculs ---------------- */
+
+  function years() {
+    var set = {};
+    repas.forEach(function (r) { if (r.date) set[r.date.slice(0, 4)] = true; });
+    return Object.keys(set).sort().reverse();
+  }
+  function inPeriod(r) { return period === "all" || r.date.slice(0, 4) === period; }
+  function filtered() { return repas.filter(inPeriod); }
+
+  function tally() {
+    var f = filtered();
+    var rows = equipiers.filter(function (e) { return e.actif !== false; }).map(function (e) {
+      var mine = f.filter(function (r) { return r.equipierId === e.id; });
+      return { id: e.id, nom: e.nom, n: mine.length, last: mine.map(function (r) { return r.date; }).sort().pop() || null };
+    });
+    rows.sort(function (a, b) {
+      if (a.n !== b.n) return b.n - a.n;
+      if (a.last !== b.last) return (b.last || "").localeCompare(a.last || "");
+      return a.nom.localeCompare(b.nom, "fr");
+    });
+    return rows;
+  }
+  function nextUp(rows) {
+    if (!rows.length) return null;
+    return rows.slice().sort(function (a, b) {
+      if (a.n !== b.n) return a.n - b.n;
+      if ((a.last || "") !== (b.last || "")) return (a.last || "").localeCompare(b.last || "");
+      return a.nom.localeCompare(b.nom, "fr");
+    })[0];
+  }
+  function stat(v, k) { return '<div class="stat"><div class="v num">' + v + '</div><div class="k">' + k + "</div></div>"; }
+
+  /* ---------------- rendu ---------------- */
+
+  function render() {
+    var rows = tally();
+    var isDemo = equipiers.length === 0;
+    var data = isDemo ? DEMO.map(function (d, i) { return { id: "demo" + i, nom: d.nom, n: d.n, last: null }; }) : rows;
+    var tot = filtered().length;
+    var nu = isDemo ? null : nextUp(rows);
+
+    var turn = $("turn");
+    if (nu && tot) {
+      turn.hidden = false;
+      $("turn-who").textContent = nu.nom;
+      $("turn-why").textContent = nu.n === 0
+        ? "Aucun repas enregistré sur la période."
+        : nu.n + " repas au compteur" + (nu.last ? ", dernier le " + fmtShort.format(parseDate(nu.last)) : "") + ".";
+    } else { turn.hidden = true; }
+
+    var nb = rows.length;
+    $("stats").innerHTML = isDemo ? "" : [
+      stat(tot, tot > 1 ? "repas comptés" : "repas compté"),
+      stat(nb, nb > 1 ? "équipiers" : "équipier"),
+      stat((nb ? tot / nb : 0).toFixed(1).replace(".", ","), "repas par équipier"),
+      stat(filtered().filter(function (r) { return r.service === "soir"; }).length, "le soir")
+    ].join("");
+
+    var ys = years();
+    $("period-chips").innerHTML = ys.length > 1
+      ? ["all"].concat(ys).map(function (y) {
+          return '<button type="button" class="chip" data-period="' + y + '" aria-pressed="' + (period === y ? "true" : "false") + '">' + (y === "all" ? "Tout" : y) + "</button>";
+        }).join("")
+      : "";
+
+    var board = $("board");
+    board.className = "board" + (isDemo ? " is-demo" : "");
+    if (!data.length) {
+      board.innerHTML = '<p class="empty">Ajoutez les équipiers de la garde pour lancer le compteur.</p>';
+    } else {
+      board.innerHTML = data.map(function (r, i) {
+        var t = (!isDemo && nu && r.id === nu.id && tot > 0) ? " is-turn" : "";
+        return '<div class="row' + t + '">' +
+          '<div class="rank num">' + (i + 1) + "</div>" +
+          '<div><div class="name">' + esc(r.nom) + "</div>" +
+          '<div class="last">' + (r.last ? "dernier repas le " + fmtShort.format(parseDate(r.last)) : (isDemo ? "&nbsp;" : "pas encore cuisiné")) + "</div></div>" +
+          '<div class="countwrap"><span class="count num">' + r.n + '</span><span class="unit">repas</span></div></div>';
+      }).join("");
+      if (isDemo) {
+        board.insertAdjacentHTML("afterbegin", '<p class="empty" style="padding-bottom:8px"><span class="demo-tag">Exemple</span> &nbsp;aperçu avec des noms fictifs.</p>');
+      }
+    }
+
+    var sel = $("f-equipier"), prev = sel.value;
+    var actifs = equipiers.filter(function (e) { return e.actif !== false; })
+      .sort(function (a, b) { return a.nom.localeCompare(b.nom, "fr"); });
+    sel.innerHTML = actifs.length
+      ? actifs.map(function (e) { return '<option value="' + esc(e.id) + '">' + esc(e.nom) + "</option>"; }).join("")
+      : '<option value="">— aucun équipier —</option>';
+    if (prev && actifs.some(function (e) { return e.id === prev; })) sel.value = prev;
+    $("f-submit").disabled = actifs.length === 0;
+
+    var h = filtered().slice().sort(function (a, b) {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return (b.ts || 0) - (a.ts || 0);
+    });
+    var shown = showAll ? h : h.slice(0, 25);
+    $("hist").innerHTML = shown.length
+      ? shown.map(function (r) {
+          var conf = pendingDelete === r.id;
+          return '<div class="hrow">' +
+            '<div><span class="hname">' + esc(r.nom) + "</span></div>" +
+            '<div class="hdate num">' + fmtLong.format(parseDate(r.date)) + "</div>" +
+            '<div><span class="badge ' + (r.service === "soir" ? "soir" : "") + '">' + (r.service === "soir" ? "Soir" : "Midi") + "</span></div>" +
+            "<div>" + (conf
+              ? '<button type="button" class="danger" data-del="' + esc(r.id) + '">Confirmer</button>'
+              : '<button type="button" class="ghost" data-ask="' + esc(r.id) + '">Supprimer</button>') +
+            "</div></div>";
+        }).join("")
+      : '<p class="empty">Aucun repas enregistré' + (period === "all" ? "" : " en " + period) + " pour l'instant.</p>";
+    $("btn-all").hidden = h.length <= 25;
+    $("btn-all").textContent = showAll ? "Réduire" : "Tout afficher (" + h.length + ")";
+
+    $("eqlist").innerHTML = equipiers.length
+      ? equipiers.slice().sort(function (a, b) { return a.nom.localeCompare(b.nom, "fr"); }).map(function (e) {
+          var n = repas.filter(function (r) { return r.equipierId === e.id; }).length;
+          return '<div class="eqline"><div>' + esc(e.nom) +
+            ' <span class="num" style="color:var(--muted);font-size:13px">· ' + n + " repas au total</span></div>" +
+            '<button type="button" class="ghost" data-rm="' + esc(e.id) + '">Retirer</button></div>';
+        }).join("")
+      : '<p class="empty" style="padding:8px 0">Aucun équipier pour le moment.</p>';
+  }
+
+  /* ---------------- évènements ---------------- */
+
+  $("f-date").value = todayISO();
+
+  $("form-add").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var e = equipiers.filter(function (x) { return x.id === $("f-equipier").value; })[0];
+    var date = $("f-date").value;
+    if (!e || !date) return;
+    addRepas({ equipierId: e.id, nom: e.nom, date: date, service: $("f-soir").checked ? "soir" : "midi", ts: Date.now() });
+    $("f-msg").textContent = "Repas du " + fmtShort.format(parseDate(date)) + " enregistré pour " + e.nom + ".";
+    setTimeout(function () { $("f-msg").textContent = ""; }, 4000);
+  });
+
+  $("form-eq").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var nom = $("f-nom").value.trim();
+    $("f-nom").value = "";
+    if (!nom) return;
+    if (equipiers.some(function (e) { return e.nom.toLowerCase() === nom.toLowerCase(); })) return;
+    addEquipier(nom);
+  });
+
+  document.addEventListener("click", function (ev) {
+    var t = ev.target && ev.target.closest ? ev.target.closest("button") : null;
+    if (!t) return;
+    if (t.dataset.period) { period = t.dataset.period; showAll = false; render(); }
+    else if (t.dataset.ask) { pendingDelete = t.dataset.ask; render(); }
+    else if (t.dataset.del) { var id = t.dataset.del; pendingDelete = null; removeRepas(id); }
+    else if (t.dataset.rm) { removeEquipier(t.dataset.rm); }
+    else if (t.id === "btn-all") { showAll = !showAll; render(); }
+    else if (t.id === "btn-refresh") { refresh(); }
+    else if (t.id === "btn-csv") { exportCsv(); }
+  });
+
+  function exportCsv() {
+    var rows = [["Date", "Repas", "Equipier"]].concat(
+      repas.slice().sort(function (a, b) { return a.date.localeCompare(b.date); })
+        .map(function (r) { return [r.date, r.service, r.nom]; })
+    );
+    var csv = rows.map(function (r) {
+      return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(";");
+    }).join("\r\n");
+    var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "tour-de-repas.csv";
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  /* ---------------- démarrage ---------------- */
+
+  if (online) {
+    $("foot").textContent = "Compteur partagé : chaque équipier peut enregistrer un repas depuis ce lien.";
+    refresh();
+    setInterval(function () { if (!document.hidden) refresh(); }, 60000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });
+  } else {
+    $("setup").hidden = false;
+    $("foot").textContent = "Mode local : les saisies restent dans ce navigateur jusqu'à la configuration de la base partagée.";
+    loadLocal();
+    render();
+  }
+})();
+</script>
+</body>
+</html>
