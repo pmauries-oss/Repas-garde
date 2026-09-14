@@ -402,6 +402,19 @@ var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
      ========================================================== */
   var SUPABASE_URL  = "https://lpuifsnlzlkeyrxidkyj.supabase.co";
   var SUPABASE_ANON = "sb_publishable_zGhJYqpSBhaKhVU0d3xyqg_rfBOBEEn";
+
+  /* Équipe de garde 1 — créée automatiquement si la base est vide.
+     Modifier un nom ici ne renomme rien : la liste ne sert qu'au premier
+     démarrage, ensuite tout se gère dans « Gérer les équipiers ». */
+  var EQUIPE = [
+    { id: "3f6a1c10-0001-4a10-9c01-0a1b2c3d0001", nom: "Pierre" },
+    { id: "3f6a1c10-0002-4a10-9c01-0a1b2c3d0002", nom: "Régis" },
+    { id: "3f6a1c10-0003-4a10-9c01-0a1b2c3d0003", nom: "Thomas" },
+    { id: "3f6a1c10-0004-4a10-9c01-0a1b2c3d0004", nom: "Bertrand" },
+    { id: "3f6a1c10-0005-4a10-9c01-0a1b2c3d0005", nom: "Pierre-François" },
+    { id: "3f6a1c10-0006-4a10-9c01-0a1b2c3d0006", nom: "Richard" },
+    { id: "3f6a1c10-0007-4a10-9c01-0a1b2c3d0007", nom: "Jérémy" }
+  ];
   /* ========================================================== */
 
   var online = /^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL) && SUPABASE_ANON.length > 20;
@@ -418,6 +431,7 @@ var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
   var period = "all";
   var showAll = false;
   var pendingDelete = null;
+  var seeded = false;
   var LS = "tour-de-repas-local";
 
   var $ = function (id) { return document.getElementById(id); };
@@ -461,6 +475,10 @@ var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
       var raw = localStorage.getItem(LS);
       if (raw) { var o = JSON.parse(raw); equipiers = o.equipiers || []; repas = o.repas || []; }
     } catch (e) { /* stockage indisponible */ }
+    if (!equipiers.length) {
+      equipiers = EQUIPE.map(function (e) { return { id: e.id, nom: e.nom, actif: true }; });
+      saveLocal();
+    }
   }
   function saveLocal() {
     try { localStorage.setItem(LS, JSON.stringify({ equipiers: equipiers, repas: repas })); } catch (e) { /* ignoré */ }
@@ -481,9 +499,22 @@ var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
       }).filter(function (r) { return /^\d{4}-\d{2}-\d{2}$/.test(r.date); });
       notice("");
       render();
+      if (!equipiers.length && !seeded) { seeded = true; return seedEquipe(); }
     }).catch(function () {
       notice("Impossible de joindre la base partagée. Vérifiez la connexion, puis appuyez sur Actualiser.");
       render();
+    });
+  }
+
+  /* Première mise en service : crée l'équipe si la table est vide.
+     Les identifiants étant fixes, un double appel ne crée pas de doublon. */
+  function seedEquipe() {
+    return api("equipiers?on_conflict=id", {
+      method: "POST",
+      body: EQUIPE.map(function (e) { return { id: e.id, nom: e.nom, actif: true }; }),
+      prefer: "resolution=ignore-duplicates,return=minimal"
+    }).then(refresh).catch(function () {
+      notice("Les équipiers n'ont pas pu être créés dans la base. Ajoutez-les depuis « Gérer les équipiers ».");
     });
   }
 
