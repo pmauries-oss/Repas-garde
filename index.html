@@ -93,19 +93,6 @@
   @media (max-width: 520px) { .emblem { width: 64px; height: 64px; } .brand { gap: 12px; } }
   .tagline { color: var(--muted); font-size: 15px; max-width: 34ch; margin: 0; }
 
-  .turn {
-    margin-top: 22px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-    background: var(--gold-soft);
-    border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
-    border-left: 5px solid var(--gold);
-    border-radius: var(--radius); padding: 16px 18px;
-  }
-  .turn .who {
-    font-family: var(--display); font-size: clamp(26px, 5vw, 34px);
-    font-weight: 700; text-transform: uppercase; line-height: 1;
-  }
-  .turn .why { color: var(--muted); font-size: 14px; }
-
   .stats { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 26px; }
   .stat .v { font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1; }
   .stat .k {
@@ -312,14 +299,6 @@
 <pre><code>var SUPABASE_URL  = "https://xxxxxxxx.supabase.co";
 var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
     <p style="color:var(--muted);font-size:14px;margin-bottom:0">En attendant, la page fonctionne en local : les saisies restent dans ce navigateur.</p>
-  </div>
-
-  <div class="turn" id="turn" hidden>
-    <div>
-      <p class="eyebrow">Prochain de corvée</p>
-      <div class="who" id="turn-who">—</div>
-    </div>
-    <div class="why" id="turn-why"></div>
   </div>
 
   <div class="stats" id="stats"></div>
@@ -588,15 +567,6 @@ var SUPABASE_ANON = "eyJhbGciOi...";</code></pre>
     var data = isDemo ? DEMO.map(function (d, i) { return { id: "demo" + i, nom: d.nom, n: d.n, last: null }; }) : rows;
     var tot = filtered().length;
     var nu = isDemo ? null : nextUp(rows);
-
-    var turn = $("turn");
-    if (nu && tot) {
-      turn.hidden = false;
-      $("turn-who").textContent = nu.nom;
-      $("turn-why").textContent = nu.n === 0
-        ? "Aucun repas enregistré sur la période."
-        : nu.n + " repas au compteur" + (nu.last ? ", dernier le " + fmtShort.format(parseDate(nu.last)) : "") + ".";
-    } else { turn.hidden = true; }
 
     var nb = rows.length;
     $("stats").innerHTML = isDemo ? "" : [
